@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insurance CRM Tracker</title>
+  <link rel="stylesheet" href="/styles.css?v=2" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <main class="shell">
+    <section id="loginView" class="panel login-panel">
+      <h1>Insurance CRM Tracker</h1>
+      <p class="muted">Shared sales tracker for 4 salespeople + owner analytics</p>
+
+      <form id="loginForm" class="stack gap-md">
+        <label>
+          Username
+          <input id="username" required placeholder="owner, sales1, sales2, sales3, sales4" />
+        </label>
+        <label>
+          Passcode
+          <input id="passcode" type="password" required placeholder="Enter passcode" />
+        </label>
+        <button type="submit" class="btn btn-gold">Sign in</button>
+      </form>
+
+      <div class="hint">
+        <p>Default login:</p>
+        <p><code>owner / owner123!</code></p>
+        <p><code>sales1..sales4 / agent123!</code></p>
+      </div>
+      <p id="loginError" class="error"></p>
+    </section>
+
+    <section id="appView" class="hidden">
+      <header class="topbar panel">
+        <div>
+          <h2 id="welcomeText">CRM</h2>
+          <p class="muted" id="modeText"></p>
+        </div>
+        <div class="row gap-sm">
+          <label>
+            Month
+            <input type="month" id="monthFilter" />
+          </label>
+          <button id="refreshBtn" class="btn">Refresh</button>
+          <button id="logoutBtn" class="btn btn-outline">Logout</button>
+        </div>
+      </header>
+
+      <nav class="tabs panel">
+        <button class="tab active" data-tab="entry">Sales Entry</button>
+        <button class="tab" data-tab="log">Sales Log</button>
+        <button class="tab" data-tab="leaderboard">Leaderboard</button>
+        <button class="tab hidden" data-tab="owner" id="ownerTabBtn">Owner Sheet</button>
+      </nav>
+
+      <section id="tab-entry" class="panel tab-content">
+        <h3>Add Policy Sale</h3>
+        <form id="saleForm" class="grid-form">
+          <label>
+            Customer Name
+            <input id="customerName" required />
+          </label>
+          <label>
+            Phone Number
+            <input id="phone" />
+          </label>
+          <label>
+            Address
+            <input id="address" />
+          </label>
+          <label>
+            Date Sold
+            <input id="dateSold" type="date" required />
+          </label>
+          <label>
+            Policy Type
+            <input id="policyType" placeholder="Auto, Home, Condo..." />
+          </label>
+          <label>
+            Carrier / Company
+            <input id="carrier" placeholder="Travelers, National General..." />
+          </label>
+          <label>
+            Exact Premium Amount ($)
+            <input id="premiumAmount" type="number" step="0.01" min="0.01" required />
+          </label>
+          <label>
+            Agent Commission %
+            <input id="agentRate" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Agency Commission %
+            <input id="agencyRate" type="number" step="0.01" min="0" />
+          </label>
+          <label id="agentSelectWrap" class="hidden">
+            Salesperson
+            <select id="salespersonSelect"></select>
+          </label>
+          <label class="full">
+            Notes
+            <textarea id="notes" rows="2"></textarea>
+          </label>
+          <button type="submit" class="btn btn-gold full">Save Sale</button>
+        </form>
+        <p id="saleMessage" class="ok"></p>
+      </section>
+
+      <section id="tab-log" class="panel tab-content hidden">
+        <h3>Sales Log</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Salesperson</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Policy</th>
+                <th>Carrier</th>
+                <th>Premium</th>
+                <th>Agent Comm.</th>
+                <th>Agency Comm.</th>
+              </tr>
+            </thead>
+            <tbody id="salesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-leaderboard" class="panel tab-content hidden">
+        <h3>Monthly Leaderboard</h3>
+        <p class="muted" id="competitionModeText"></p>
+        <div id="leaderboardCards" class="cards"></div>
+      </section>
+
+      <section id="tab-owner" class="panel tab-content hidden">
+        <h3>Hidden Owner Sheet</h3>
+        <div id="metricCards" class="cards"></div>
+
+        <h4>By Salesperson</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Salesperson</th>
+                <th>Deals</th>
+                <th>Premium</th>
+                <th>Agent Comm.</th>
+                <th>Agency Comm.</th>
+              </tr>
+            </thead>
+            <tbody id="ownerTableBody"></tbody>
+          </table>
+        </div>
+
+        <h4>Upload Existing Data (CSV)</h4>
+        <div class="row gap-sm upload-row">
+          <input type="file" id="csvFile" accept=".csv" />
+          <button id="uploadBtn" class="btn">Upload CSV</button>
+          <a href="/template.csv" class="btn btn-outline" download>Template CSV</a>
+          <a href="/sample_data.csv" class="btn btn-outline" download>Sample Data CSV</a>
+          <button id="exportBtn" class="btn btn-outline">Export Month CSV</button>
+        </div>
+        <p id="uploadMessage" class="ok"></p>
+
+        <h4>Owner Settings</h4>
+        <form id="settingsForm" class="grid-form compact">
+          <label class="toggle">
+            <input id="competitionMode" type="checkbox" />
+            Competition mode: salespeople can see everyone
+          </label>
+          <label>
+            Default Agent Commission %
+            <input id="defaultAgentRate" type="number" step="0.01" min="0" />
+          </label>
+          <label>
+            Default Agency Commission %
+            <input id="defaultAgencyRate" type="number" step="0.01" min="0" />
+          </label>
+          <div class="full">
+            <h4>Salesperson Names</h4>
+            <div id="agentNameFields" class="grid-form compact"></div>
+          </div>
+          <button type="submit" class="btn btn-gold">Save Settings</button>
+        </form>
+        <p id="settingsMessage" class="ok"></p>
+      </section>
+    </section>
+  </main>
+
+  <script src="/app.js?v=2"></script>
+</body>
+</html>
